@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>مطعم النيل الذهبي</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --gold: #c8813a;
+    --dark: #3d1f0a;
+    --mid: #7a4a1e;
+    --light: #fdf6ee;
+    --cream: #f9efe0;
+    --border: #e8d5b8;
+    --text-soft: #8a6040;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Cairo', 'Amiri', sans-serif;
+    background: var(--light);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ===== PAGE SYSTEM ===== */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== MENU PAGE ===== */
+  .header {
+    background: linear-gradient(160deg, #2a1206 0%, #6b3a14 55%, #c8813a 100%);
+    color: var(--light);
+    padding: 36px 20px 28px;
+    text-align: center;
+    position: relative;
+  }
+  .header-ornament { font-size: 22px; opacity: 0.7; margin-bottom: 6px; letter-spacing: 8px; }
+  .header h1 { font-family: 'Amiri', serif; font-size: 2.3rem; font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+  .header p { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; font-style: italic; }
+  .header-divider { font-size: 18px; opacity: 0.5; margin-top: 10px; letter-spacing: 6px; }
+
+  .lang-switch {
+    position: absolute; top: 16px; left: 16px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; padding: 6px 14px; border-radius: 50px;
+    cursor: pointer; font-size: 13px; font-family: 'Cairo', sans-serif;
+    font-weight: 600; transition: background 0.2s;
+  }
+  .lang-switch:hover { background: rgba(255,255,255,0.25); }
+
+  .qr-btn-header {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; padding: 6px 14px; border-radius: 50px;
+    cursor: pointer; font-size: 13px; font-family: 'Cairo', sans-serif;
+    font-weight: 600; transition: background 0.2s;
+  }
+  .qr-btn-header:hover { background: rgba(255,255,255,0.25); }
+
+  /* Category tabs */
+  .tabs-wrap {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tab {
+    display: inline-block;
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--mid);
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    margin-left: 8px;
+    transition: all 0.2s;
+  }
+  .tab:last-child { margin-left: 0; }
+  .tab:hover { background: #f5e0c0; }
+  .tab.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+
+  /* Items grid */
+  .items-section { padding: 20px 16px; max-width: 720px; margin: 0 auto; }
+  .section-title {
+    font-size: 1.3rem; font-weight: 700; color: var(--mid);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .item-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(150,90,30,0.07);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.3s ease both;
+  }
+  .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(150,90,30,0.13); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .item-name { font-size: 1rem; font-weight: 700; color: var(--dark); flex: 1; }
+  .item-price {
+    background: #f5e0c0; color: var(--mid);
+    font-weight: 700; font-size: 0.9rem;
+    padding: 3px 10px; border-radius: 50px; white-space: nowrap;
+  }
+  .item-desc { font-size: 0.83rem; color: var(--text-soft); line-height: 1.6; }
+
+  /* Footer */
+  .footer {
+    text-align: center; padding: 28px 20px 40px;
+    color: var(--text-soft); font-size: 0.85rem;
+    border-top: 1px solid var(--border); margin-top: 16px;
+  }
+  .footer-ornament { font-size: 18px; letter-spacing: 8px; margin-bottom: 8px; opacity: 0.5; }
+
+  /* ===== QR PAGE ===== */
+  .qr-page {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #2a1206 0%, #6b3a14 60%, #c8813a 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 20px; text-align: center;
+  }
+  .qr-ornament { font-size: 24px; letter-spacing: 10px; color: rgba(255,210,130,0.6); margin-bottom: 12px; }
+  .qr-title { font-family: 'Amiri', serif; font-size: 2rem; color: #fdf6ee; margin-bottom: 4px; }
+  .qr-subtitle { font-size: 0.9rem; color: rgba(253,246,238,0.7); margin-bottom: 32px; font-style: italic; }
+  .qr-box {
+    background: #fdf6ee;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 16px 60px rgba(0,0,0,0.4);
+    margin-bottom: 24px;
+  }
+  #qrcode canvas, #qrcode img { border-radius: 8px; }
+  .qr-label {
+    color: var(--mid); font-size: 0.85rem;
+    margin-top: 14px; font-weight: 600; font-family: 'Cairo', sans-serif;
+  }
+  .qr-instruction {
+    color: rgba(253,246,238,0.85);
+    font-size: 1rem; margin-bottom: 28px; line-height: 1.7;
+  }
+  .qr-instruction strong { color: #f5c878; }
+  .url-box {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 28px;
+    max-width: 400px; width: 100%;
+  }
+  .url-box p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
+  .url-box input {
+    background: transparent; border: none; outline: none;
+    color: #f5c878; font-size: 0.9rem; width: 100%;
+    font-family: monospace; text-align: center;
+  }
+  .copy-btn {
+    background: var(--gold); color: #fff; border: none;
+    border-radius: 50px; padding: 12px 28px;
+    font-size: 1rem; font-family: 'Cairo', sans-serif;
+    font-weight: 700; cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    margin-bottom: 12px; display: block; width: 100%; max-width: 280px;
+  }
+  .copy-btn:hover { background: #a66228; transform: scale(1.02); }
+  .back-btn {
+    background: rgba(255,255,255,0.1); color: #fdf6ee;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50px; padding: 10px 24px;
+    font-size: 0.9rem; font-family: 'Cairo', sans-serif;
+    font-weight: 600; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.2); }
+  .copied-msg {
+    color: #a8e6a0; font-size: 0.85rem; margin-top: 8px;
+    opacity: 0; transition: opacity 0.3s;
+    font-weight: 600;
+  }
+  .copied-msg.show { opacity: 1; }
+
+  /* ===== English overrides ===== */
+  body.en { direction: ltr; text-align: left; }
+  body.en .lang-switch { left: auto; right: 16px; }
+  body.en .qr-btn-header { right: auto; left: 16px; }
+  body.en .tab { margin-left: 0; margin-right: 8px; }
+  body.en .tab:last-child { margin-right: 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== MENU PAGE ===== -->
+<div id="menuPage" class="page active">
+
+  <div class="header">
+    <button class="lang-switch" onclick="toggleLang()">EN</button>
+    <button class="qr-btn-header" onclick="showQR()">📱 QR</button>
+    <div class="header-ornament">☽ ✦ ☾</div>
+    <h1 id="restName">مطعم النيل الذهبي</h1>
+    <p id="restTagline">أصالة الطعم المصري منذ ١٩٨٥</p>
+    <div class="header-divider">― ✦ ―</div>
+  </div>
+
+  <div class="tabs-wrap" id="tabsWrap"></div>
+
+  <div class="items-section">
+    <div class="section-title" id="sectionTitle"></div>
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-ornament">☽ ✦ ☾</div>
+    <p id="footerText">نتشرف بخدمتكم — شكراً لاختياركم مطعم النيل الذهبي</p>
+  </div>
+</div>
+
+<!-- ===== QR PAGE ===== -->
+<div id="qrPage" class="page">
+  <div class="qr-page">
+    <div class="qr-ornament">☽ ✦ ☾</div>
+    <div class="qr-title" id="qrRestName">مطعم النيل الذهبي</div>
+    <div class="qr-subtitle" id="qrTagline">مسح الكود للاطلاع على المينيو</div>
+
+    <div class="qr-box">
+      <div id="qrcode"></div>
+      <div class="qr-label" id="qrLabel">امسح للاطلاع على المينيو</div>
+    </div>
+
+    <p class="qr-instruction" id="qrInstruction">
+      ارفع ملف <strong>menu.html</strong> على أي استضافة مجانية<br/>
+      مثل <strong>Netlify</strong> أو <strong>GitHub Pages</strong><br/>
+      ثم ضع الرابط هنا وهيتولد الـ QR تلقائياً ✨
+    </p>
+
+    <div class="url-box">
+      <p id="urlLabel">رابط المينيو</p>
+      <input type="text" id="menuUrl" placeholder="https://your-menu-link.com"
+        oninput="updateQR()" value=""/>
+    </div>
+
+    <button class="copy-btn" onclick="copyUrl()" id="copyBtn">نسخ الرابط</button>
+    <div class="copied-msg" id="copiedMsg">✓ تم النسخ!</div>
+
+    <button class="back-btn" onclick="showMenu()" id="backBtn">← رجوع للمينيو</button>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const data = {
+  ar: {
+    restName: "مطعم النيل الذهبي",
+    tagline: "أصالة الطعم المصري منذ ١٩٨٥",
+    footer: "نتشرف بخدمتكم — شكراً لاختياركم مطعم النيل الذهبي",
+    qrScan: "امسح للاطلاع على المينيو",
+    qrInstr: 'ارفع ملف <strong>menu.html</strong> على أي استضافة مجانية<br/>مثل <strong>Netlify</strong> أو <strong>GitHub Pages</strong><br/>ثم ضع الرابط هنا وهيتولد الـ QR تلقائياً ✨',
+    urlLabel: "رابط المينيو",
+    copyBtn: "نسخ الرابط",
+    copiedMsg: "✓ تم النسخ!",
+    backBtn: "← رجوع للمينيو",
+    qrTagline: "مسح الكود للاطلاع على المينيو",
+    langSwitch: "EN",
+    categories: [
+      { id:"appetizers", name:"المقبلات", icon:"🥙", items:[
+        {name:"كشري مصري", desc:"أرز وعدس ومكرونة بصلصة الطماطم والخل والبصل المقلي", price:"٣٥ ج"},
+        {name:"فول مدمس", desc:"فول بزيت الزيتون والليمون والثوم وجرجير طازج", price:"٢٥ ج"},
+        {name:"طعمية", desc:"فلافل مقرمشة بالأعشاب الطازجة مع طحينة", price:"٣٠ ج"},
+        {name:"بابا غنوج", desc:"باذنجان مشوي بالطحينة والثوم والليمون", price:"٤٠ ج"},
+        {name:"ورق عنب", desc:"أوراق عنب محشية بالأرز والتوابل العطرية", price:"٥٥ ج"},
+      ]},
+      { id:"mains", name:"الأطباق الرئيسية", icon:"🍖", items:[
+        {name:"كباب مشوي", desc:"كباب لحم بالتوابل المصرية على الفحم مع أرز وسلاطة", price:"١٢٠ ج"},
+        {name:"حمام محشي", desc:"حمام مصري محشي بالأرز والأعشاب مع صلصة البصل", price:"١٥٠ ج"},
+        {name:"سمك فيليه مشوي", desc:"سمك بلطي طازج بتتبيلة الثوم والليمون والكمون", price:"١٣٥ ج"},
+        {name:"أرنب بالطماطم", desc:"أرنب مطبوخ ببطء بالطماطم والتوابل المصرية", price:"١٤٠ ج"},
+        {name:"ملوخية بالفراخ", desc:"ملوخية خضراء طازجة بصدر الفراخ والثوم المحمر", price:"١١٠ ج"},
+      ]},
+      { id:"grills", name:"المشويات", icon:"🔥", items:[
+        {name:"كوارع", desc:"كوارع لحم مطبوخة ببطء مع الحمص والتوابل", price:"١٦٠ ج"},
+        {name:"كفتة مشوية", desc:"كفتة لحم بقري مشوية على الفحم مع خبز بلدي", price:"١٠٠ ج"},
+        {name:"فراخ مشوية", desc:"دجاجة كاملة متبلة بالليمون والثوم والكمون", price:"١٣٠ ج"},
+        {name:"سيخ لحم", desc:"سيخ لحم ضأن بالبهارات مع توم وطحينة", price:"١١٥ ج"},
+      ]},
+      { id:"desserts", name:"الحلويات", icon:"🍯", items:[
+        {name:"أم علي", desc:"حلوى مصرية تقليدية بالمكسرات والكريمة والعجين", price:"٦٥ ج"},
+        {name:"بسبوسة", desc:"كعكة السميد بالقشطة والعسل والمكسرات", price:"٤٥ ج"},
+        {name:"كنافة", desc:"كنافة بالجبنة العكاوي والقطر والفستق", price:"٧٠ ج"},
+        {name:"رقاقة بالعسل", desc:"عجين مقلي بالعسل الأبيض والسمسم", price:"٤٠ ج"},
+      ]},
+      { id:"drinks", name:"المشروبات", icon:"🫖", items:[
+        {name:"شاي بالنعناع", desc:"شاي أحمر مصري بأوراق النعناع الطازجة", price:"٢٠ ج"},
+        {name:"عصير قصب", desc:"عصير قصب سكر طازج بالليمون والزنجبيل", price:"٢٥ ج"},
+        {name:"كركديه", desc:"مشروب الكركديه الساخن أو البارد", price:"٢٢ ج"},
+        {name:"عرق سوس", desc:"مشروب عرق السوس الطبيعي المنعش", price:"٢٠ ج"},
+      ]},
+    ]
+  },
+  en: {
+    restName: "Golden Nile Restaurant",
+    tagline: "Authentic Egyptian Flavors Since 1985",
+    footer: "We are honored to serve you — Thank you for choosing Golden Nile",
+    qrScan: "Scan to view the menu",
+    qrInstr: 'Upload <strong>menu.html</strong> to any free hosting<br/>like <strong>Netlify</strong> or <strong>GitHub Pages</strong><br/>then paste the link here and your QR generates instantly ✨',
+    urlLabel: "Menu URL",
+    copyBtn: "Copy Link",
+    copiedMsg: "✓ Copied!",
+    backBtn: "← Back to Menu",
+    qrTagline: "Scan the code to view the menu",
+    langSwitch: "عربي",
+    categories: [
+      { id:"appetizers", name:"Appetizers", icon:"🥙", items:[
+        {name:"Koshari", desc:"Rice, lentils & pasta with tomato sauce, vinegar & crispy onions", price:"35 EGP"},
+        {name:"Ful Medames", desc:"Fava beans with olive oil, lemon, garlic & fresh arugula", price:"25 EGP"},
+        {name:"Ta'ameya", desc:"Crispy Egyptian falafel with fresh herbs & tahini", price:"30 EGP"},
+        {name:"Baba Ghanouj", desc:"Smoky grilled eggplant with tahini, garlic & lemon", price:"40 EGP"},
+        {name:"Stuffed Vine Leaves", desc:"Tender vine leaves filled with spiced rice & herbs", price:"55 EGP"},
+      ]},
+      { id:"mains", name:"Main Dishes", icon:"🍖", items:[
+        {name:"Grilled Kebab", desc:"Spiced minced meat kebab over charcoal with rice & salad", price:"120 EGP"},
+        {name:"Stuffed Pigeon", desc:"Egyptian pigeon stuffed with rice & herbs in onion sauce", price:"150 EGP"},
+        {name:"Grilled Fish Fillet", desc:"Fresh Nile tilapia with garlic, lemon & cumin marinade", price:"135 EGP"},
+        {name:"Rabbit with Tomato", desc:"Slow-cooked rabbit in tomato & Egyptian spice sauce", price:"140 EGP"},
+        {name:"Molokhia with Chicken", desc:"Fresh green molokhia with chicken breast & roasted garlic", price:"110 EGP"},
+      ]},
+      { id:"grills", name:"Grills", icon:"🔥", items:[
+        {name:"Lamb Shanks", desc:"Slow-braised lamb shanks with chickpeas & spices", price:"160 EGP"},
+        {name:"Grilled Kofta", desc:"Charcoal-grilled beef kofta with local bread & dips", price:"100 EGP"},
+        {name:"Grilled Chicken", desc:"Whole chicken marinated in lemon, garlic & cumin", price:"130 EGP"},
+        {name:"Lamb Skewer", desc:"Tender lamb skewer with spices, garlic sauce & tahini", price:"115 EGP"},
+      ]},
+      { id:"desserts", name:"Desserts", icon:"🍯", items:[
+        {name:"Om Ali", desc:"Traditional Egyptian bread pudding with cream & mixed nuts", price:"65 EGP"},
+        {name:"Basbousa", desc:"Semolina cake with cream, honey & nuts", price:"45 EGP"},
+        {name:"Konafa", desc:"Shredded pastry with white cheese, syrup & pistachios", price:"70 EGP"},
+        {name:"Honey Crunch", desc:"Fried dough drizzled with white honey & sesame seeds", price:"40 EGP"},
+      ]},
+      { id:"drinks", name:"Drinks", icon:"🫖", items:[
+        {name:"Mint Tea", desc:"Egyptian red tea with fresh mint leaves", price:"20 EGP"},
+        {name:"Sugarcane Juice", desc:"Fresh sugarcane juice with lemon & ginger", price:"25 EGP"},
+        {name:"Karkade", desc:"Hibiscus drink served hot or cold", price:"22 EGP"},
+        {name:"Liquorice", desc:"Natural refreshing liquorice drink", price:"20 EGP"},
+      ]},
+    ]
+  }
+};
+
+let currentLang = "ar";
+let activeCat = "appetizers";
+let qrInstance = null;
+
+function render() {
+  const d = data[currentLang];
+  const isAr = currentLang === "ar";
+
+  // dir
+  document.documentElement.lang = currentLang;
+  document.body.dir = isAr ? "rtl" : "ltr";
+  document.body.className = isAr ? "" : "en";
+
+  // header
+  document.getElementById("restName").textContent = d.restName;
+  document.getElementById("restTagline").textContent = d.tagline;
+  document.getElementById("footerText").textContent = d.footer;
+  document.querySelector(".lang-switch").textContent = d.langSwitch;
+
+  // tabs
+  const tabsWrap = document.getElementById("tabsWrap");
+  tabsWrap.innerHTML = "";
+  d.categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "tab" + (cat.id === activeCat ? " active" : "");
+    btn.innerHTML = cat.icon + " " + cat.name;
+    btn.onclick = () => { activeCat = cat.id; renderItems(); renderTabs(); };
+    tabsWrap.appendChild(btn);
+  });
+
+  renderItems();
+  renderQRPage();
+}
+
+function renderTabs() {
+  const d = data[currentLang];
+  document.querySelectorAll(".tab").forEach((btn, i) => {
+    btn.className = "tab" + (d.categories[i].id === activeCat ? " active" : "");
+  });
+}
+
+function renderItems() {
+  const d = data[currentLang];
+  const cat = d.categories.find(c => c.id === activeCat);
+  document.getElementById("sectionTitle").innerHTML = cat.icon + " " + cat.name;
+  const grid = document.getElementById("itemsGrid");
+  grid.innerHTML = "";
+  cat.items.forEach((item, idx) => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.style.animationDelay = (idx * 0.05) + "s";
+    card.innerHTML = `
+      <div class="item-top">
+        <div class="item-name">${item.name}</div>
+        <div class="item-price">${item.price}</div>
+      </div>
+      <div class="item-desc">${item.desc}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderQRPage() {
+  const d = data[currentLang];
+  document.getElementById("qrRestName").textContent = d.restName;
+  document.getElementById("qrTagline").textContent = d.qrTagline;
+  document.getElementById("qrLabel").textContent = d.qrScan;
+  document.getElementById("qrInstruction").innerHTML = d.qrInstr;
+  document.getElementById("urlLabel").textContent = d.urlLabel;
+  document.getElementById("copyBtn").textContent = d.copyBtn;
+  document.getElementById("copiedMsg").textContent = d.copiedMsg;
+  document.getElementById("backBtn").textContent = d.backBtn;
+  document.getElementById("menuUrl").placeholder = currentLang === "ar" ? "https://your-menu-link.com" : "https://your-menu-link.com";
+}
+
+function toggleLang() {
+  currentLang = currentLang === "ar" ? "en" : "ar";
+  render();
+}
+
+function showQR() {
+  document.getElementById("menuPage").classList.remove("active");
+  document.getElementById("qrPage").classList.add("active");
+  generateQR();
+}
+
+function showMenu() {
+  document.getElementById("qrPage").classList.remove("active");
+  document.getElementById("menuPage").classList.add("active");
+}
+
+function generateQR() {
+  const container = document.getElementById("qrcode");
+  container.innerHTML = "";
+  const url = document.getElementById("menuUrl").value.trim() || window.location.href;
+  qrInstance = new QRCode(container, {
+    text: url,
+    width: 200, height: 200,
+    colorDark: "#3d1f0a",
+    colorLight: "#fdf6ee",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function updateQR() {
+  setTimeout(() => {
+    const container = document.getElementById("qrcode");
+    container.innerHTML = "";
+    const url = document.getElementById("menuUrl").value.trim() || window.location.href;
+    new QRCode(container, {
+      text: url,
+      width: 200, height: 200,
+      colorDark: "#3d1f0a",
+      colorLight: "#fdf6ee",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }, 300);
+}
+
+function copyUrl() {
+  const url = document.getElementById("menuUrl").value.trim();
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    const msg = document.getElementById("copiedMsg");
+    msg.classList.add("show");
+    setTimeout(() => msg.classList.remove("show"), 2000);
+  });
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
